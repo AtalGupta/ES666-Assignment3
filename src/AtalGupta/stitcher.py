@@ -4,12 +4,12 @@ import os
 
 class PanaromaStitcher:
     def __init__(self):
-        self.sift = cv2.SIFT_create(nfeatures=1000)  # Further reduced features
+        self.sift = cv2.SIFT_create(nfeatures=1000)  
         FLANN_INDEX_KDTREE = 1
         index_params = dict(algorithm=FLANN_INDEX_KDTREE, trees=5)
         search_params = dict(checks=50)
         self.flann = cv2.FlannBasedMatcher(index_params, search_params)
-        self.max_image_dim = 800  # Maximum dimension for any image
+        self.max_image_dim = 800  
 
     def resize_image(self, img):
         """Resize image while maintaining aspect ratio"""
@@ -43,7 +43,6 @@ class PanaromaStitcher:
                 if m.distance < 0.7 * n.distance:
                     good_matches.append(m)
             
-            # Limit number of matches to reduce memory usage
             return kp1, kp2, good_matches[:50]
             
         except Exception as e:
@@ -69,8 +68,7 @@ class PanaromaStitcher:
                 
                 if H is None:
                     continue
-                
-                # Quick inlier check
+
                 inliers = 0
                 for i in range(min(len(matches), 20)):
                     pt1 = src_pts[i]
@@ -128,7 +126,6 @@ class PanaromaStitcher:
             xmin, ymin = np.int32(all_corners.min(axis=0).ravel() - 0.5)
             xmax, ymax = np.int32(all_corners.max(axis=0).ravel() + 0.5)
             
-            # Limit output size
             width = min(xmax - xmin, 5000)
             height = min(ymax - ymin, 5000)
             
@@ -169,7 +166,6 @@ class PanaromaStitcher:
             if not image_files:
                 return None, []
             
-            # Read and resize images
             images = []
             for img_path in image_files:
                 try:
@@ -209,7 +205,6 @@ class PanaromaStitcher:
                     print(f"Error processing image pair {i}: {str(e)}")
                     continue
             
-            # Ensure final image size is reasonable
             if result is not None and (result.shape[0] > 5000 or result.shape[1] > 5000):
                 scale = min(5000 / result.shape[0], 5000 / result.shape[1])
                 result = cv2.resize(result, None, fx=scale, fy=scale, interpolation=cv2.INTER_AREA)
